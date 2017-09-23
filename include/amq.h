@@ -59,6 +59,7 @@ class protocol_t {
 protected:
     protocol_t();
 public:
+    virtual ~protocol_t() {}
     static protocol_t* Bind(context_t* ctx, std::string uri);
     static protocol_t* InitConnector(context_t *ctx, std::string info);
     virtual void Poll() {}

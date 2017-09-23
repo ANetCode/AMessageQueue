@@ -27,7 +27,7 @@ std::vector<std::string> debug::GetStackTrace() {
         char addr[48] = {};
         sscanf(strs[i], "%*s %s %s %s %*s %d", (char*)&moduleName, (char*)&addr, (char*)&functionSymbol, &offset);
         int   validCppName = 0;
-        char* functionName = abi::__cxa_demangle(functionSymbol, NULL, 0, &validCppName); 
+        char* functionName = abi::__cxa_demangle(functionSymbol, NULL, 0, &validCppName);
         char stackFrame[4096] = {};
         if (validCppName == 0) { // success
             sprintf(stackFrame, "(%s)\t0x%s — %s + %d",
@@ -80,7 +80,7 @@ protocol_t::protocol_t() {
 
 protocol_t* protocol_t::CreateProtocol (amq::context_t* ctx, std::string uri) {
     if (StringStartsWith(uri, "tcp://")) {
-        protocol_t* p = new tcp_protocol_t;
+        protocol_t* p = new tcp_protocol_t();
         p->context = ctx;
         ctx->AddProtocol(p);
         return p;

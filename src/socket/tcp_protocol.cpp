@@ -5,8 +5,8 @@ void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
 
 using namespace amq;
 
-tcp_protocol_t::tcp_protocol_t() : 
-    protocol_t() 
+tcp_protocol_t::tcp_protocol_t() :
+    protocol_t()
 {
     bHasRequest = false;
 }
@@ -25,7 +25,7 @@ bool tcp_protocol_t::Bind(std::string info) {
 
     const char* host = h.c_str();
     int port = atoi(p.c_str());
-    if (host == nullptr || 
+    if (host == nullptr ||
         h.empty() ||
         port == 0 ) {
         return false;
@@ -58,7 +58,7 @@ void tcp_protocol_t::OnAccept () {
     int                  client_sd;
     struct ev_io        *w_client;
     int                  revents;
-    
+
     if(EV_ERROR & m_io.events) {
       perror("got invalid event");
       return;

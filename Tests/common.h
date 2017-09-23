@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <unistd.h>
-#include <AMessageQueue.h>
+#include <amq.h>
 #include <unistd.h>
 
 

@@ -1,7 +1,6 @@
-all:
-	mkdir -p build && cd build && cmake -DCMAKE_BUILD_TYPE=Debug .. && make
+.PHONY : all
 
-clean:
-	cd build && make clean
-purge:
-	rm -rf build
+all :
+	@echo action is $(action)
+	make -C src $(action)
+	make -C Tests $(action)
