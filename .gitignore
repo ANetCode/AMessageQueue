@@ -1,3 +1,9 @@
 build
 .vscode
 *.cache
+config.h
+config.log
+config.status
+Makefile
+stamp-h1
+*.Po
