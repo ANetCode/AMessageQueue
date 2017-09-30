@@ -8,8 +8,26 @@ AM_INIT_AUTOMAKE([foreign -Werror subdir-objects])
 AC_PROG_CXX
 AC_PROG_RANLIB
 
-AC_CONFIG_SRCDIR([Tests/dummy/main.cpp])
+AC_ARG_ENABLE(debug,
+AS_HELP_STRING([--enable-debug],
+               [enable debugging, default: no]),
+[case "${enableval}" in
+             yes) debug=true ;;
+             no)  debug=false ;;
+             *)   AC_MSG_ERROR([bad value ${enableval} for --enable-debug]) ;;
+esac],
+[debug=false])
+
+AM_CONDITIONAL(DEBUG, test x"$debug" = x"true")
+
+AC_CONFIG_SRCDIR([])
 AC_CONFIG_HEADERS([config.h])
-AC_CONFIG_FILES([Makefile src/Makefile Tests/dummy/Makefile Tests/server/Makefile])
+AC_CONFIG_FILES([Makefile \
+    src/Makefile \
+    Tests/Makefile \
+    Tests/dummy/Makefile \
+    Tests/server/Makefile \
+    Tests/client/Makefile
+])
 
 AC_OUTPUT

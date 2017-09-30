@@ -1,1 +1,1 @@
-SUBDIRS = dummy server
+SUBDIRS=dummy server client
