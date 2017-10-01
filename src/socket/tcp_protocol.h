@@ -4,6 +4,7 @@
 #include "../AMessageQueue_priv.h"
 #include "socket_utils.h"
 #include <list>
+#include "../utils/utils.h"
 
 namespace amq {
 class tcp_protocol_t;
@@ -31,15 +32,18 @@ public:
 
     bool Bind(std::string info);
     void Poll();
+    bool connect(std::string info);
 
     void OnAccept();
     void OnMessage(tcp_io_t* reader, message_t* msg);
     void send(message_t*);
+    bool isAlive();
 protected:
-    int             fd;
-    struct ev_io    m_io;
-    struct ev_loop *loop;
+    int                  fd;
+    struct ev_io         m_io;
+    struct ev_loop      *loop;
     std::list<message_t> recv_msg;
+    tcp_io_t            *remote; /// < only client
 };
 
 }

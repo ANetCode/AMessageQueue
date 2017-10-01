@@ -23,8 +23,8 @@ static void OnMessage(amq::message_t msg) {
 void run_server(int argc, const char** argv) {
     amq::context_t context;
     amq::protocol_t *protocol;
-    
-    protocol = amq::protocol_t::Bind(&context, "tcp://0.0.0.0:9981");
+
+    protocol = amq::protocol_t::Bind(&context, "tcpmsg://0.0.0.0:9981");
     if (protocol == nullptr) {
         cout << "protocol not support!" << endl;
         return ;
@@ -36,7 +36,7 @@ void run_server(int argc, const char** argv) {
             // amq::message_t request;
             // protocol->recv(&request);
         }
-        
+
         // printf("poll one.\n");
         usleep(500);
     }

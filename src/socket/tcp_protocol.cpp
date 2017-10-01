@@ -1,4 +1,5 @@
 #include "tcp_protocol.h"
+using namespace std;
 
 void accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
 void read_cb(struct ev_loop *loop, struct ev_io *watcher, int revents);
@@ -9,13 +10,15 @@ tcp_protocol_t::tcp_protocol_t() :
     protocol_t()
 {
     bHasRequest = false;
+    remote = nullptr;
 }
 
-bool tcp_protocol_t::Bind(std::string info) {
-    if (info.size() < 6) {
+bool GetHostPort(const std::string& info, std::string& host, int& port) {
+    // "tcpmsg://"
+    if (info.size() < 9) {
         return false;
     }
-    std::string hostport = info.substr(6, -1);
+    std::string hostport = info.substr(9, -1);
     int idx = hostport.find(':');
     if (idx < 0) {
         return false;
@@ -23,14 +26,25 @@ bool tcp_protocol_t::Bind(std::string info) {
     std::string h = hostport.substr(0, idx);
     std::string p = hostport.substr(idx + 1, -1);
 
-    const char* host = h.c_str();
-    int port = atoi(p.c_str());
-    if (host == nullptr ||
+    const char* chost = h.c_str();
+    int cport = atoi(p.c_str());
+    if (chost == nullptr ||
         h.empty() ||
         port == 0 ) {
         return false;
     }
-    fd = SocketServer(host, port);
+    host = std::string(chost);
+    port = cport;
+    return true;
+}
+
+bool tcp_protocol_t::Bind(std::string info) {
+    std::string host;
+    int port;
+    if (GetHostPort(info, host, port) == false) {
+        return false;
+    }
+    fd = SocketServer(host.c_str(), port);
 
     // init ev
     loop = ev_loop_new();
@@ -84,12 +98,50 @@ void tcp_protocol_t::OnAccept () {
 }
 
 void tcp_protocol_t::send(message_t*msg) {
-    if (msg->__priv_data == nullptr){
-
-        return;
+    if (remote != nullptr) { // 作为客户端的protocol 
+        remote->on_send(msg);
+    } else {
+        if (msg->__priv_data == nullptr){
+            LOGD() << "tcp_io_t __priv_data null\n";
+            return;
+        }
+        tcp_io_t* io = (tcp_io_t*)msg->__priv_data;
+        io->on_send(msg);
     }
-    tcp_io_t* io = (tcp_io_t*)msg->__priv_data;
-    io->on_send(msg);
+}
+
+bool tcp_protocol_t::isAlive() {
+    return false;
+}
+
+
+
+bool tcp_protocol_t::connect(std::string info) {
+    std::string host;
+    int port;
+    if (GetHostPort(info, host, port) == false) { 
+        LOGD() << "connect error. host: " << host << " port: " << port << LOGEND();
+        return false;
+    }
+    int fd = SocketConnect(host.c_str(), port);
+    if (fd == -1) {
+        LOGD() << "socket connect error." << LOGEND();
+        return -1;
+    }
+    loop = ev_loop_new();
+    ev_io_init(&m_io, accept_cb, fd, EV_READ);
+    m_io.data = this;
+    ev_io_start(loop, &m_io);
+    
+    // new client protocol
+    remote = new tcp_io_t();
+    remote->fd   = fd;
+    remote->loop = loop;
+    remote->m_io.data = remote;
+    remote->protocol = this;
+    remote->isAlive  = true;
+    
+    return true;
 }
 
 void accept_cb(struct ev_loop *loop, struct ev_io *watcher, int revents) {

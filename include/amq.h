@@ -4,16 +4,31 @@
 #include <string>
 #include <list>
 #include <vector>
+#include <iostream>
+#include <fstream>
 
 namespace amq {
-    class debug{
-    public:
-        static std::vector<std::string> GetStackTrace();
-        static void PrintfStackTrace();
-    };
-}
 
-namespace amq {
+class Log {
+public:
+    Log(std::string const& filename);
+    ~Log();
+    template<typename T>
+    Log& operator<<(T t) {
+        std::cout << t;
+        if (fileLog) {
+            stream_ << t;
+        }
+        return *this;
+    }
+    static Log& debug();
+private:
+    bool fileLog;
+    std::ofstream stream_;
+};
+
+#define LOGD() amq::Log::debug() << __FILE__ << ": " << __LINE__ << " "
+#define LOGEND() "\n";
 
 class context_t;
 class protocol_t;
@@ -64,8 +79,10 @@ public:
     static protocol_t* InitConnector(context_t *ctx, std::string info);
     virtual void Poll() {}
     bool hasRequest() { return bHasRequest; }
+    virtual bool isAlive() { return false; }
     virtual void recv(message_t*) {}
     virtual void send(message_t*){}
+    virtual bool connect(std::string info) { LOGD()<< "xxxx" << LOGEND(); return false;}
     OnProtocolMessage OnMessageCallback;
     void* data;
 protected:

@@ -45,13 +45,8 @@ int SocketConnect(const char* host, int port) {
     struct sockaddr_in addr;
 
     fd = socket (AF_INET, SOCK_STREAM, 0);
-    // non block
-    SetSocketBlockingEnabled(fd, false);
-    // reuse port
-    int enable = 1;
-    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
-        perror("setsockopt(SO_REUSEADDR) failed");
-
+    
+    
     // init socket
     bzero (&addr, sizeof(addr));
     addr.sin_family = AF_INET;
@@ -60,5 +55,12 @@ int SocketConnect(const char* host, int port) {
  
     if (::connect(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) 
         perror("ERROR connecting");
+    // non block
+    SetSocketBlockingEnabled(fd, false);
+    // reuse port
+    int enable = 1;
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+        perror("setsockopt(SO_REUSEADDR) failed");
+
     return fd;
 }

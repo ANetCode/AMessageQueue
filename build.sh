@@ -1,3 +1,3 @@
 #!/bin/bash
 autoreconf --install
-./configure && make
+./configure && make -j8

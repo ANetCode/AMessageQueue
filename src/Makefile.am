@@ -7,7 +7,14 @@ libamq_a_SOURCES = \
     socket/socket_utils.cpp \
     socket/tcp_io.cpp \
     socket/tcp_protocol.cpp \
-    utils/string_utils.cpp
+    utils/string_utils.cpp \
+    utils/debug_utils.cpp \
+    utils/log_utils.cpp
+
+dist_include_HEADERS = \
+    AMessageQueue_priv.h \
+    utils/debug_utils.h
+
 libamq_a_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/include
 
 if DEBUG

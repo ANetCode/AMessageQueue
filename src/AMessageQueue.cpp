@@ -2,61 +2,6 @@
 #include <stdlib.h>
 using namespace amq;
 
-#define BACKTRACE
-#ifdef BACKTRACE
-#include <iostream>
-#include <execinfo.h>
-#include <cxxabi.h>
-#include <string>
-#include <stdio.h>
-#include <vector>
-#include <algorithm>
-#include <memory>
-std::vector<std::string> debug::GetStackTrace() {
-    const int size = 128;
-    int callstack[size] = {};
-    int  frames = backtrace((void**) callstack, size);
-    char** strs = backtrace_symbols((void**) callstack, frames);
-    std::vector<std::string> stackFrames;
-    stackFrames.reserve(frames);
-
-    for (int i = 0; i < frames; ++i) {
-        char functionSymbol[1024] = {};
-        char moduleName[1024] = {};
-        int  offset = 0;
-        char addr[48] = {};
-        sscanf(strs[i], "%*s %s %s %s %*s %d", (char*)&moduleName, (char*)&addr, (char*)&functionSymbol, &offset);
-        int   validCppName = 0;
-        char* functionName = abi::__cxa_demangle(functionSymbol, NULL, 0, &validCppName);
-        char stackFrame[4096] = {};
-        if (validCppName == 0) { // success
-            sprintf(stackFrame, "(%s)\t0x%s — %s + %d",
-                    moduleName, addr, functionName, offset);
-        } else {
-            sprintf(stackFrame, "(%s)\t0x%s — %s + %d",
-                    moduleName, addr, functionName, offset);
-        }
-
-        if (functionName) {
-            free(functionName);
-        }
-        std::string frameStr(stackFrame);
-        stackFrames.push_back(frameStr);
-    }
-    free(strs);
-    return stackFrames;
-}
-#else
-std::vector<std::string> debug::GetStackTrace() {}
-#endif
-
-void debug::PrintfStackTrace() {
-    std::vector<std::string> bt = GetStackTrace();
-    for(int i = 0; i < bt.size(); i++) {
-        printf("%s\n", bt[i].c_str());
-    }
-}
-
 context_t::context_t() {
 
 }
@@ -79,12 +24,13 @@ protocol_t::protocol_t() {
 }
 
 protocol_t* protocol_t::CreateProtocol (amq::context_t* ctx, std::string uri) {
-    if (StringStartsWith(uri, "tcp://")) {
+    if (StringStartsWith(uri, "tcpmsg://")) {
         protocol_t* p = new tcp_protocol_t();
         p->context = ctx;
         ctx->AddProtocol(p);
         return p;
     }
+    LOGD() << "protocol error: " << uri << LOGEND();
     return nullptr;
 }
 protocol_t* protocol_t::Bind(context_t* ctx, std::string uri) {
@@ -99,9 +45,12 @@ protocol_t* protocol_t::Bind(context_t* ctx, std::string uri) {
 
 protocol_t* protocol_t::InitConnector(context_t* ctx, std::string uri) {
     protocol_t* p = CreateProtocol(ctx, uri);
+    LOGD() << p << LOGEND();
     if (p == nullptr) return nullptr;
-    ctx->AddProtocol(p);
-    return p;
+    if (p->connect(uri)) {
+        return p;
+    }
+    delete p;
     return nullptr;
 }
 
@@ -170,6 +119,7 @@ void message_t::reply(message_t* msg) {
     msg->__priv_data = this->__priv_data;
     m_protocol->send(msg);
 }
+
 void message_t::send(std::string uri) {
 
 }
