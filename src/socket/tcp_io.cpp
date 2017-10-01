@@ -1,11 +1,11 @@
 #include "tcp_protocol.h"
 using namespace amq;
 
-int32_t MESSAGE_MAX_SIZE = 6;
+int32_t MESSAGE_MAX_SIZE = 16 * 1024 * 1024;
 static int total_clients;
 tcp_io_t::tcp_io_t() {
     recving = false;
-    msg.alloc(16 * 1024 * 1024);
+    msg.alloc(MESSAGE_MAX_SIZE);
 }
 void tcp_io_t::on_read() {
     int BUFFER_SIZE = 6;
@@ -33,7 +33,7 @@ void tcp_io_t::on_read() {
     read = ::recv(fd, buffer, recv_size, 0);
     
     if(read < 0) {
-        perror("read error");
+        LOGD() << "read error. fd: " << fd << " reson: " << strerror(errno) << LOGEND();
         return;
     }
     

@@ -2,44 +2,6 @@
 using namespace amq;
 using namespace std;
 
-void OnMessage(amq::message_t msg) {
-    printf("============================>%p, %s\n", &msg, msg.data());
-
-    if(strncmp("ping", (const char*)msg.data(), 4) == 0) {
-        amq::message_t reply_msg;
-        reply_msg.copy((const uint8_t*)"pon1234", 8);
-        msg.reply(&reply_msg);
-    }
-
-    if(strncmp("quit", (const char*)msg.data(), 4) == 0) {
-        amq::message_t reply_msg;
-        reply_msg.copy((const uint8_t*)"pongd", 5);
-        // io->release();
-    }
-}
-
-void test() {
-    amq::context_t context;
-    amq::protocol_t *protocol;
-
-    protocol = amq::protocol_t::Bind(&context, "tcp://0.0.0.0:9981");
-    if (protocol == nullptr) {
-        cout << "protocol not support!" << endl;
-        return ;
-    }
-    protocol->OnMessageCallback = OnMessage;
-    while(true) {
-        context.Poll();
-        if (protocol->hasRequest()) {
-            // amq::message_t request;
-            // protocol->recv(&request);
-        }
-
-        // printf("poll one.\n");
-        usleep(500);
-    }
-}
-
 /**
  * @brief      { function_description }
  *

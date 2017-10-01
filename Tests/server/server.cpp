@@ -19,7 +19,6 @@ static void OnMessage(amq::message_t msg) {
     }
 }
 
-
 void run_server(int argc, const char** argv) {
     amq::context_t context;
     amq::protocol_t *protocol;

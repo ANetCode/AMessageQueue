@@ -114,8 +114,6 @@ bool tcp_protocol_t::isAlive() {
     return false;
 }
 
-
-
 bool tcp_protocol_t::connect(std::string info) {
     std::string host;
     int port;
@@ -129,9 +127,6 @@ bool tcp_protocol_t::connect(std::string info) {
         return -1;
     }
     loop = ev_loop_new();
-    ev_io_init(&m_io, accept_cb, fd, EV_READ);
-    m_io.data = this;
-    ev_io_start(loop, &m_io);
     
     // new client protocol
     remote = new tcp_io_t();
@@ -141,6 +136,9 @@ bool tcp_protocol_t::connect(std::string info) {
     remote->protocol = this;
     remote->isAlive  = true;
     
+    ev_io_init(&remote->m_io, read_cb, fd, EV_READ);
+    ev_io_start(loop, &remote->m_io);
+
     return true;
 }
 
