@@ -26,7 +26,8 @@ AC_CONFIG_FILES([Makefile \
     Tests/Makefile \
     Tests/dummy/Makefile \
     Tests/server/Makefile \
-    Tests/client/Makefile
+    Tests/client/Makefile \
+    Tests/timer/Makefile 
 ])
 
 AC_OUTPUT

@@ -6,7 +6,6 @@ static void timeout_cb (struct ev_loop *loop, ev_timer *w, int revents);
 class timer_impl_t : public amq::timer_t {
 public:
     ev_timer timeout_watcher;
-    struct ev_loop      *loop;
 };
 
 timer_t::timer_t() {
@@ -15,8 +14,13 @@ timer_t::timer_t() {
 
 timer_t* timer_t::create(context_t* context, float duration) {
     timer_impl_t* ptr = new timer_impl_t();
-    ev_timer_init (&ptr->timeout_watcher, timeout_cb, duration, 0.);
-    ev_timer_start (ptr->loop, &ptr->timeout_watcher);
+    struct ev_loop *loop = context->GetImpl()->loop;
+    ev_timer *timeout_watcher = &(ptr->timeout_watcher);
+
+    timeout_watcher->data = ptr;
+    ev_timer_init (timeout_watcher, timeout_cb, duration, 0.);
+    ev_timer_start (loop, timeout_watcher);
+    LOGD() << "setup a timer " << duration << "s";
     return ptr;
 }
 
@@ -31,4 +35,5 @@ timeout_cb (struct ev_loop *loop, ev_timer *w, int revents) {
         t->OnTimeout();
     }
     ev_break (EV_A_ EVBREAK_ONE);
+    delete t;
 }

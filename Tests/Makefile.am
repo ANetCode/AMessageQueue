@@ -1,1 +1,1 @@
-SUBDIRS=dummy server client
+SUBDIRS=dummy server client timer

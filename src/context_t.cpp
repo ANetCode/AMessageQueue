@@ -22,6 +22,7 @@ void context_t::addPollItem(poll_t *p){
 
 void context_t::Poll() {
     if (!validate()) {
+        LOGE() << "context invalidate.";
         return;
     }
     ((context_impl_t*)ptr)->Poll();
@@ -34,10 +35,8 @@ bool context_t::validate () {
     return true;
 }
 
-context_impl_t::context_impl_t() : context_t()
-{
+context_impl_t::context_impl_t() : context_t() {
     loop = ev_loop_new();
-    LOGD() << "loop       ===>: " << loop << LOGEND();
 }
 
 void context_impl_t::Poll() {
