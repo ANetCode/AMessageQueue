@@ -1,4 +1,5 @@
 #include "socket_utils.h"
+#include "amq.h"
 
 bool SetSocketBlockingEnabled(int fd, bool blocking) {
     if (fd < 0)
@@ -17,15 +18,21 @@ bool SetSocketBlockingEnabled(int fd, bool blocking) {
 
 int SocketServer(const char* bindAddress, int port) {
     int fd = -1;
+    int rs = -1;
     struct sockaddr_in addr;
 
     fd = socket (AF_INET, SOCK_STREAM, 0);
+    if (fd == -1) {
+        LOGE() << "socket:" << strerror(errno);
+        return -1;
+    } 
     // non block
     SetSocketBlockingEnabled(fd, false);
     // reuse port
     int enable = 1;
-    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
-        perror("setsockopt(SO_REUSEADDR) failed");
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
+        LOGE() << ("setsockopt(SO_REUSEADDR) failed") << strerror(errno);;
+    }
 
     // init socket
     bzero (&addr, sizeof(addr));
@@ -34,8 +41,11 @@ int SocketServer(const char* bindAddress, int port) {
     addr.sin_addr.s_addr = INADDR_ANY;
 
     // bind
-    bind (fd, (struct sockaddr *)(&addr), sizeof(addr));
-
+    rs = bind (fd, (struct sockaddr *)(&addr), sizeof(addr));
+    if (fd == -1) {
+        LOGE() << "bind:" << strerror(errno);
+        return -1;
+    }
     // listen
     listen(fd, 10);
     return fd;
@@ -46,6 +56,10 @@ int SocketConnect(const char* host, int port) {
 
     fd = socket (AF_INET, SOCK_STREAM, 0);
     
+    if (fd == -1) {
+        LOGE() << "socket:" << strerror(errno);
+        return -1;
+    } 
     
     // init socket
     bzero (&addr, sizeof(addr));
@@ -53,14 +67,20 @@ int SocketConnect(const char* host, int port) {
     addr.sin_port = htons(port);
     addr.sin_addr.s_addr = INADDR_ANY;
  
-    if (::connect(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) 
-        perror("ERROR connecting");
+    if (::connect(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+        LOGE() << "connect:" << strerror(errno);
+        close(fd);
+        return -1;
+    }
     // non block
     SetSocketBlockingEnabled(fd, false);
     // reuse port
     int enable = 1;
-    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
-        perror("setsockopt(SO_REUSEADDR) failed");
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
+        LOGE() << ("setsockopt(SO_REUSEADDR) failed") << strerror(errno);;
+        close(fd);
+        return -1;
+    }
 
     return fd;
 }

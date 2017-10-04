@@ -1,3 +1,4 @@
+#include "tcp_io.h"
 #include "tcp_protocol.h"
 using namespace std;
 
@@ -9,18 +10,19 @@ using namespace amq;
 tcp_protocol_t::tcp_protocol_t() :
     protocol_t()
 {
-    bHasRequest = false;
     remote = nullptr;
 }
 
 bool GetHostPort(const std::string& info, std::string& host, int& port) {
     // "tcpmsg://"
     if (info.size() < 9) {
+        LOGW() << "ERR";
         return false;
     }
     std::string hostport = info.substr(9, -1);
     int idx = hostport.find(':');
     if (idx < 0) {
+        LOGW() << "ERR";
         return false;
     }
     std::string h = hostport.substr(0, idx);
@@ -28,11 +30,7 @@ bool GetHostPort(const std::string& info, std::string& host, int& port) {
 
     const char* chost = h.c_str();
     int cport = atoi(p.c_str());
-    if (chost == nullptr ||
-        h.empty() ||
-        port == 0 ) {
-        return false;
-    }
+   
     host = std::string(chost);
     port = cport;
     return true;
@@ -42,20 +40,17 @@ bool tcp_protocol_t::Bind(std::string info) {
     std::string host;
     int port;
     if (GetHostPort(info, host, port) == false) {
+        LOGE() << "get host and port error. uri:" << info << " host:" << host << " port:" << port;
         return false;
     }
     fd = SocketServer(host.c_str(), port);
-
+    
     // init ev
-    loop = ev_loop_new();
+    struct ev_loop *loop = context->GetImpl()->loop;
     ev_io_init(&m_io, accept_cb, fd, EV_READ);
     m_io.data = this;
     ev_io_start(loop, &m_io);
     return true;
-}
-
-void tcp_protocol_t::Poll() {
-    ev_loop(loop, EVLOOP_NONBLOCK);
 }
 
 void tcp_protocol_t::OnMessage(tcp_io_t* io, message_t* msg) {
@@ -74,25 +69,28 @@ void tcp_protocol_t::OnAccept () {
     int                  revents;
 
     if(EV_ERROR & m_io.events) {
-      perror("got invalid event");
-      return;
+        LOGE() <<("got invalid event");
+        return;
     }
     // Accept client request
     client_sd = accept(m_io.fd, (struct sockaddr *)&client_addr, &len);
 
     if (client_sd < 0) {
-        perror("accept error.");
+        LOGE() << ("accept error.");
         return;
     }
 
     // new client protocol
-    tcp_io_t* io = new tcp_io_t();
+    tcp_io_t* io = new tcp_io_t(context);
     io->fd   = client_sd;
-    io->loop = loop;
     io->m_io.data = io;
     io->protocol = this;
     io->isAlive  = true;
-
+    totalConnection++;
+    if (OnConnectedCallback != nullptr) {
+        OnConnectedCallback(this);
+    }
+    struct ev_loop *loop = context->GetImpl()->loop;
     ev_io_init(&io->m_io, read_cb, client_sd, EV_READ);
     ev_io_start(loop, &io->m_io);
 }
@@ -123,15 +121,13 @@ bool tcp_protocol_t::connect(std::string info) {
     }
     int fd = SocketConnect(host.c_str(), port);
     if (fd == -1) {
-        LOGD() << "socket connect error." << LOGEND();
-        return -1;
+        return false;
     }
-    loop = ev_loop_new();
     
     // new client protocol
-    remote = new tcp_io_t();
+    struct ev_loop *loop = context->GetImpl()->loop;
+    remote = new tcp_io_t(context);
     remote->fd   = fd;
-    remote->loop = loop;
     remote->m_io.data = remote;
     remote->protocol = this;
     remote->isAlive  = true;

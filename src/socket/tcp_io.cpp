@@ -1,10 +1,12 @@
+#include "tcp_io.h"
 #include "tcp_protocol.h"
 using namespace amq;
 
 int32_t MESSAGE_MAX_SIZE = 16 * 1024 * 1024;
-static int total_clients;
-tcp_io_t::tcp_io_t() {
+
+tcp_io_t::tcp_io_t(context_t* context) {
     recving = false;
+    this->context = context;
     msg.alloc(MESSAGE_MAX_SIZE);
 }
 void tcp_io_t::on_read() {
@@ -17,7 +19,7 @@ void tcp_io_t::on_read() {
     }
     
     if(EV_ERROR & m_io.events) {
-        perror("got invalid event");
+        LOGE() << ("got invalid event") << strerror(errno);;
         return;
     }
     memset(buffer, 0, BUFFER_SIZE);
@@ -68,7 +70,6 @@ void tcp_io_t::on_read() {
 }
 
 void tcp_io_t::on_send(message_t* msg) {
-    printf("on_send:[%s] %zu\n", msg->data(), msg->size());
     int32_t len = msg->size();
     if (len > MESSAGE_MAX_SIZE) {
         printf("send %p oom, len: %d\n", msg, len);
@@ -82,11 +83,12 @@ void tcp_io_t::on_send(message_t* msg) {
 void tcp_io_t::release() {
     // Stop and free watchet if client socket is closing
     isAlive = false;
+    struct ev_loop *loop = context->GetImpl()->loop;
     ev_io_stop(loop, &m_io);
     close(fd);
     fd = -1;
-    perror("peer might closing");
-    total_clients --; // Decrement total_clients count
-    printf("%d client(%p) connected.\n", total_clients, this);
+    LOGE() << "peer might closing:" << strerror(errno);
+    protocol->OnDisconnect();
+    
     delete this;
 }

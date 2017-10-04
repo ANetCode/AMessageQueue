@@ -3,7 +3,10 @@ AUTOMAKE_OPTIONS=foreign
 lib_LIBRARIES = libamq.a
 
 libamq_a_SOURCES = \
-    AMessageQueue.cpp \
+    context_t.cpp \
+    message_t.cpp \
+    protocol_t.cpp \
+    timer_t.cpp \
     socket/socket_utils.cpp \
     socket/tcp_io.cpp \
     socket/tcp_protocol.cpp \
@@ -12,7 +15,7 @@ libamq_a_SOURCES = \
     utils/log_utils.cpp
 
 dist_include_HEADERS = \
-    AMessageQueue_priv.h \
+    amq_priv.h \
     utils/debug_utils.h
 
 libamq_a_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/include

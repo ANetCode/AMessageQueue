@@ -1,58 +1,5 @@
-#include "AMessageQueue_priv.h"
-#include <stdlib.h>
+#include "amq_priv.h"
 using namespace amq;
-
-context_t::context_t() {
-
-}
-
-void context_t::AddProtocol(protocol_t *p){
-    protocols.push_back(p);
-}
-
-void context_t::Poll() {
-    for(auto p : protocols) {
-        p->Poll();
-    }
-}
-
-bool StringStartsWith(const std::string content, const std::string prefix) {
-    return content.substr(0, prefix.size()) == prefix;
-}
-protocol_t::protocol_t() {
-    OnMessageCallback = nullptr;
-}
-
-protocol_t* protocol_t::CreateProtocol (amq::context_t* ctx, std::string uri) {
-    if (StringStartsWith(uri, "tcpmsg://")) {
-        protocol_t* p = new tcp_protocol_t();
-        p->context = ctx;
-        ctx->AddProtocol(p);
-        return p;
-    }
-    LOGD() << "protocol error: " << uri << LOGEND();
-    return nullptr;
-}
-protocol_t* protocol_t::Bind(context_t* ctx, std::string uri) {
-    protocol_t* p = CreateProtocol(ctx, uri);
-    if (p == nullptr) return nullptr;
-    if(p->Bind(uri) == false) {
-        delete p;
-        return nullptr;
-    }
-    return p;
-}
-
-protocol_t* protocol_t::InitConnector(context_t* ctx, std::string uri) {
-    protocol_t* p = CreateProtocol(ctx, uri);
-    LOGD() << p << LOGEND();
-    if (p == nullptr) return nullptr;
-    if (p->connect(uri)) {
-        return p;
-    }
-    delete p;
-    return nullptr;
-}
 
 message_t::message_t() {
     init();
@@ -118,10 +65,6 @@ void message_t::reply(message_t* msg) {
     }
     msg->__priv_data = this->__priv_data;
     m_protocol->send(msg);
-}
-
-void message_t::send(std::string uri) {
-
 }
 
 void message_t::set_protocol(protocol_t* p) {
