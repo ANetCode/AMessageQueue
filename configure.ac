@@ -19,6 +19,9 @@ AC_ARG_ENABLE([debug],
 esac],[debug=false])
 AM_CONDITIONAL([DEBUG], [test x$debug = xtrue])
 
+# copy lib 
+AC_CONFIG_LINKS([lib/libamq.a:src/libamq.a])
+
 AC_CONFIG_SRCDIR([])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile \

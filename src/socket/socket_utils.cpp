@@ -33,7 +33,7 @@ int SocketServer(const char* bindAddress, int port) {
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
         LOGE() << ("setsockopt(SO_REUSEADDR) failed") << strerror(errno);;
     }
-
+ 
     // init socket
     bzero (&addr, sizeof(addr));
     addr.sin_family = AF_INET;
