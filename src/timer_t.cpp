@@ -9,7 +9,7 @@ public:
 };
 
 timer_t::timer_t() {
-
+    OnTimeout = nullptr;
 }
 
 timer_t* timer_t::create(context_t* context, float duration) {
@@ -24,15 +24,17 @@ timer_t* timer_t::create(context_t* context, float duration) {
     return ptr;
 }
 
-void timer_t::OnTimeout() {
-    LOGD() << "timeout";
+void timer_t::timeout() {
+    if (OnTimeout != nullptr) {
+        OnTimeout(this);
+    }
 }
 
 static void
 timeout_cb (struct ev_loop *loop, ev_timer *w, int revents) {
     timer_t *t = (timer_t *)w->data;
     if (t != nullptr) {
-        t->OnTimeout();
+        t->timeout();
     }
     ev_break (EV_A_ EVBREAK_ONE);
     delete t;

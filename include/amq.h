@@ -51,9 +51,12 @@ class context_t;
 class context_impl_t;
 class protocol_t;
 class message_t;
+class timer_t;
 
-typedef void(*OnProtocolMessage)(message_t);
-typedef void(*OnProtocolEvent)(protocol_t*);
+typedef void(*OnProtocolMessage)(amq::message_t);
+typedef void(*OnProtocolEvent)(amq::protocol_t*);
+typedef void(*OnTimeoutCallback)(amq::timer_t*);
+
 
 class poll_t {
 public:
@@ -126,7 +129,8 @@ class timer_t {
 public:
     static timer_t* create(context_t* context, float duration);
     void* data;
-    void OnTimeout();
+    void timeout();
+    OnTimeoutCallback OnTimeout;
 protected:
     timer_t();
 };
