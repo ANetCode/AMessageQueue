@@ -10,4 +10,5 @@ Tests/client/client
 Tests/dummy/dummytest
 Tests/server/server
 Tests/timer/timertest
+*.log
 lib/libamq.a
