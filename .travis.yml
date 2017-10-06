@@ -2,3 +2,4 @@ language: cpp
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y build-essential autoconf libtool libev-dev
+  - autoreconf --install
