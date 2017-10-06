@@ -7,7 +7,7 @@ int main(int argc, char const *argv[]) {
     context_t context;
 
     context.init();
-    timer_t* timer = timer_t::create(&context, 5.0f);
+    atimer_t* timer = atimer_t::create(&context, 5.0f);
 
      // 轮询context
      while(true) {

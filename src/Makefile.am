@@ -6,7 +6,7 @@ libamq_a_SOURCES = \
     context_t.cpp \
     message_t.cpp \
     protocol_t.cpp \
-    timer_t.cpp \
+    atimer_t.cpp \
     socket/socket_utils.cpp \
     socket/tcp_io.cpp \
     socket/tcp_protocol.cpp \

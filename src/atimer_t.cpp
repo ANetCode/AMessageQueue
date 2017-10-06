@@ -3,16 +3,16 @@ using namespace amq;
 
 static void timeout_cb (struct ev_loop *loop, ev_timer *w, int revents);
 
-class timer_impl_t : public amq::timer_t {
+class timer_impl_t : public amq::atimer_t {
 public:
     ev_timer timeout_watcher;
 };
 
-amq::timer_t::timer_t() {
+amq::atimer_t::atimer_t() {
     OnTimeout = nullptr;
 }
 
-timer_t* amq::timer_t::create(context_t* context, float duration) {
+atimer_t* amq::atimer_t::create(context_t* context, float duration) {
     timer_impl_t* ptr = new timer_impl_t();
     struct ev_loop *loop = context->GetImpl()->loop;
     ev_timer *timeout_watcher = &(ptr->timeout_watcher);
@@ -24,7 +24,7 @@ timer_t* amq::timer_t::create(context_t* context, float duration) {
     return ptr;
 }
 
-void amq::timer_t::timeout() {
+void amq::atimer_t::timeout() {
     if (OnTimeout != nullptr) {
         OnTimeout(this);
     }
@@ -32,7 +32,7 @@ void amq::timer_t::timeout() {
 
 static void
 timeout_cb (struct ev_loop *loop, ev_timer *w, int revents) {
-    timer_t *t = (timer_t *)w->data;
+    atimer_t *t = (atimer_t *)w->data;
     if (t != nullptr) {
         t->timeout();
     }
