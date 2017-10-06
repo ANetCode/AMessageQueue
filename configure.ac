@@ -19,7 +19,7 @@ AC_ARG_ENABLE([debug],
 esac],[debug=false])
 AM_CONDITIONAL([DEBUG], [test x$debug = xtrue])
 
-# copy lib 
+# copy lib
 #AC_CONFIG_LINKS([lib/libamq.a:src/libamq.a])
 
 AC_CONFIG_SRCDIR([])
@@ -30,7 +30,8 @@ AC_CONFIG_FILES([Makefile \
     Tests/dummy/Makefile \
     Tests/server/Makefile \
     Tests/client/Makefile \
-    Tests/timer/Makefile 
+    Tests/timer/Makefile
 ])
+
 
 AC_OUTPUT
