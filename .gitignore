@@ -1,16 +1,10 @@
 build
 .vscode
 *.cache
-config.h
-config.log
-config.status
-Makefile
-stamp-h1
 *.Po
 *.o
 *.a
 *.dirstamp
-Makefile
 deps/
 Tests/client/client
 Tests/dummy/dummytest
