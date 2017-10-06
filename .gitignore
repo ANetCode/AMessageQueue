@@ -9,7 +9,10 @@ stamp-h1
 *.Po
 *.o
 *.a
-*.in
 *.dirstamp
 Makefile
 deps/
+Tests/client/client
+Tests/dummy/dummytest
+Tests/server/server
+Tests/timer/timertest
