@@ -3,6 +3,7 @@
 
 #include <chrono>
 #include <ctime>
+#include <iomanip> // std::put_time
 
 using namespace std;
 using namespace amq;
@@ -75,10 +76,10 @@ const char* Log::end_line() {
 }
 
 void Log::prelog(std::string file, int line) {
-    ss_mem << "\n\033[0m" << "[" << std::chrono::system_clock::now() << "]" << 
+    ss_mem << "\n\033[0m" << "[" << std::chrono::system_clock::now() << "]" <<
     file << ": " << line << log_color << " ";
     if (fileLog) {
-        ss_mem << "\n" <<  "[" << std::chrono::system_clock::now() << "]" << 
+        ss_mem << "\n" <<  "[" << std::chrono::system_clock::now() << "]" <<
         file << ": " << line << log_color << " ";
     }
 }
