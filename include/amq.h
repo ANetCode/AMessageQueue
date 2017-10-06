@@ -9,6 +9,7 @@
 #include <iostream>
 #include <sstream>
 #include <unistd.h>
+#include <string.h>
 
 namespace amq {
 
