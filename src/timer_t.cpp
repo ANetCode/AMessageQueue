@@ -8,11 +8,11 @@ public:
     ev_timer timeout_watcher;
 };
 
-timer_t::timer_t() {
+amq::timer_t::timer_t() {
     OnTimeout = nullptr;
 }
 
-timer_t* timer_t::create(context_t* context, float duration) {
+timer_t* amq::timer_t::create(context_t* context, float duration) {
     timer_impl_t* ptr = new timer_impl_t();
     struct ev_loop *loop = context->GetImpl()->loop;
     ev_timer *timeout_watcher = &(ptr->timeout_watcher);
@@ -24,7 +24,7 @@ timer_t* timer_t::create(context_t* context, float duration) {
     return ptr;
 }
 
-void timer_t::timeout() {
+void amq::timer_t::timeout() {
     if (OnTimeout != nullptr) {
         OnTimeout(this);
     }
